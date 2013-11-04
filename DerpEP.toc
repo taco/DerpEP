@@ -1,0 +1,6 @@
+## Interface: 50400
+## Title : Derp EP
+## Notes: /derp
+## Author: My Name
+embeds.xml
+Core.lua
