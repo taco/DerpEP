@@ -15,13 +15,13 @@ function Derp:Initialize()
 	Derp:RegisterChatCommand("derp", "Slash");
 	Derp:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
 	Derp:RegisterEvent("CHAT_MSG_WHISPER");
-	Derp:RegisterEvent("CHAT_MSG_BN_WHISPER");
-	Derp:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE");
-	Derp:RegisterEvent("CHAT_MSG_MONSTER_EMOTE");
-	Derp:RegisterEvent("CHAT_MSG_MONSTER_SAY");
-	Derp:RegisterEvent("CHAT_MSG_MONSTER_YELL");
-	Derp:RegisterEvent("CHAT_MSG_EMOTE");
-	Derp:RegisterEvent("CHAT_MSG_TEXT_EMOTE");
+	-- Derp:RegisterEvent("CHAT_MSG_BN_WHISPER");
+	-- Derp:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE");
+	-- Derp:RegisterEvent("CHAT_MSG_MONSTER_EMOTE");
+	-- Derp:RegisterEvent("CHAT_MSG_MONSTER_SAY");
+	-- Derp:RegisterEvent("CHAT_MSG_MONSTER_YELL");
+	-- Derp:RegisterEvent("CHAT_MSG_EMOTE");
+	-- Derp:RegisterEvent("CHAT_MSG_TEXT_EMOTE");
 
 end
 
