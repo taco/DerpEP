@@ -3,18 +3,27 @@ local derps = {
 	{ source = "Rook Stonetoe", spell = "Corrupted Brew", event = "SPELL_DAMAGE", amount = 25},
 	{ source = "Thok the Bloodthirsty", spell = "Chomp", event = "SPELL_DAMAGE", amount = 25},
 	{ source = nil, spell = "Matter Purification Beam", event = "SPELL_DAMAGE", amount = 25},
-	{ source = "Git", spell = "Devastate", event = "SPELL_DAMAGE", amount = 25},
+
+	-- Shamans
+	{ source = "Toxic Tornado", spell = "Toxic Tornado", event = "SPELL_DAMAGE", amount = 25},
+	{ source = "Toxic Tornado", spell = "Toxic Tornado", event = "SPELL_PERIODIC_DAMAGE", amount = 25},
+	{ source = "Wavebinder Kardis", spell = "Foul Geyser", event = "SPELL_DAMAGE", amount = 25},
+	{ source = "Earthbreaker Haromm", spell = "Foul Stream", event = "SPELL_PERIODIC_DAMAGE", amount = 25},
+	{ source = nil, spell = "Iron Tomb", event = "SPELL_DAMAGE", amount = 25},
+
+	--{ source = "Git", spell = "Devastate", event = "SPELL_DAMAGE", amount = 25},
 
 	-- Paragons
 	{ source = "Ka'roz the Locust", spell = "Whirling", event = "SPELL_DAMAGE", amount = 25},
 	{ source = "Hisek the Swarmkeeper", spell = "Sonic Pulse", event = "SPELL_PERIODIC_DAMAGE", amount = 25},
-	{ source = "Ka'roz the Locust", spell = "Caustic Amber", event = "SPELL_PERIODIC_DAMAGE", amount = 25}
+	{ source = "Ka'roz the Locust", spell = "Caustic Amber", event = "SPELL_PERIODIC_DAMAGE", amount = 25},
+	{ source = nil, spell = "Matter Purification Beam", event = "SPELL_DAMAGE", amount = 25},
 };
 
 local derpCount = 0
 local derpTable = {}
 
-local derpAmount = -5
+local derpAmount = -10
 
 local derpState = nil
 
@@ -81,6 +90,9 @@ function Derp:Slash(msg)
 	if msg == "check" then
 		Derp:CheckWipe()
 	end
+	if msg == "undo" then
+		EPGP:IncEPBy(UnitName("target"), "Undo Derp", 10);
+	end
 	local ep, gp, main = EPGP:GetEPGP(msg)
 
 	if ep then
@@ -92,7 +104,7 @@ function Derp:Slash(msg)
 	end
 
 	if msg == "" then
-		EPGP:IncEPBy(UnitName("target"), "Derp", -25);
+		EPGP:IncEPBy(UnitName("target"), "Derp", -10);
 	end
 end
 
@@ -155,10 +167,10 @@ function Derp:OnWipe()
 	if derpCount > 1 then
 		for k1,v1 in pairs(derpTable) do
 			msg = ""
-			SendChatMessage("Derp for " .. k1 .. ": ", "GUILD")
+			SendChatMessage("Derp for **" .. k1 .. "**)) ", "GUILD")
 			for k2,v2 in pairs(derpTable[k1]) do
 				--msg = msg .. derpTable[k1][k2].player .. " (" .. derpTable[k1][k2].count .. "x " .. derpTable[k1][k2].damage .. ") "
-				SendChatMessage(derpTable[k1][k2].player .. " (" .. derpTable[k1][k2].count .. "x " .. math.ceil(derpTable[k1][k2].damage/1000) .. "k) ", "GUILD")
+				SendChatMessage(" - " .. derpTable[k1][k2].player .. " (" .. derpTable[k1][k2].count .. "x " .. math.ceil(derpTable[k1][k2].damage/1000) .. "k) ", "GUILD")
 			end
 			SendChatMessage(msg, "GUILD")
 		end
@@ -183,10 +195,13 @@ Derp:SetScript("OnEvent", function(self, event, timeStamp, subEvent, hideCaster,
 		return
 	end
 
-	if (event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_BN_WHISPER") and timeStamp == "repair" then
-		--local msg = "===== " .. subEvent .. " Enabled Repairs =====";
-		--SendChatMessage(msg, "GUILD");
-		GuildBankRepairToggle:EnableRepairs();
+	if event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_BN_WHISPER" and timeStamp == "repair" then
+		if timeStamp == "repair" then
+			GuildBankRepairToggle:EnableRepairs()
+		elseif timeStamp == "wipe" then
+			Derp:OnWipe()
+		end
+		return
 	end
 
 	-- if spellName == "Sonic Pulse" then
