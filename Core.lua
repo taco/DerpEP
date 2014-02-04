@@ -11,12 +11,12 @@ local derps = {
 	{ source = "Earthbreaker Haromm", spell = "Foul Stream", event = "SPELL_PERIODIC_DAMAGE", amount = 25},
 	{ source = nil, spell = "Iron Tomb", event = "SPELL_DAMAGE", amount = 25},
 
-	--{ source = "Git", spell = "Devastate", event = "SPELL_DAMAGE", amount = 25},
+	{ source = "Git", spell = "Devastate", event = "SPELL_DAMAGE", amount = 25},
 
 	-- Paragons
 	{ source = "Ka'roz the Locust", spell = "Whirling", event = "SPELL_DAMAGE", amount = 25},
 	{ source = "Hisek the Swarmkeeper", spell = "Sonic Pulse", event = "SPELL_PERIODIC_DAMAGE", amount = 25},
-	{ source = "Ka'roz the Locust", spell = "Caustic Amber", event = "SPELL_PERIODIC_DAMAGE", amount = 25},
+	--{ source = "Ka'roz the Locust", spell = "Caustic Amber", event = "SPELL_PERIODIC_DAMAGE", amount = 25},
 	{ source = nil, spell = "Matter Purification Beam", event = "SPELL_DAMAGE", amount = 25},
 };
 
@@ -25,8 +25,6 @@ local derpTable = {}
 
 local derpAmount = -10
 
-local derpState = nil
-
 Derp = CreateFrame("Frame")
 
 LibStub("AceConsole-3.0"):Embed(Derp)
@@ -34,17 +32,14 @@ LibStub("AceTimer-3.0"):Embed(Derp)
 
 function Derp:Initialize()
 	print("DerpEP: Welcome to Derpville. Please enjoy your stay!")
-	Derp:RegisterChatCommand("derp", "Slash");
-	Derp:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
-	Derp:RegisterEvent("CHAT_MSG_WHISPER");
-	-- Derp:RegisterEvent("CHAT_MSG_BN_WHISPER");
-	-- Derp:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE");
-	-- Derp:RegisterEvent("CHAT_MSG_MONSTER_EMOTE");
-	-- Derp:RegisterEvent("CHAT_MSG_MONSTER_SAY");
-	-- Derp:RegisterEvent("CHAT_MSG_MONSTER_YELL");
-	-- Derp:RegisterEvent("CHAT_MSG_EMOTE");
-	-- Derp:RegisterEvent("CHAT_MSG_TEXT_EMOTE");
+	
+	self.tracking = false
+	
+	self:RegisterChatCommand("derp", "Slash")
+	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	self:RegisterEvent("CHAT_MSG_WHISPER")
 
+	self:SetScript("OnEvent", self.HandleEvent)
 end
 
 function Derp:Slash(msg)
@@ -82,13 +77,13 @@ function Derp:Slash(msg)
 	end
 
 	if msg == "pull" then
-		Derp:StartCombat()
+		self:StartCombat()
 	end
 	if msg == "wipe" then
-		Derp:OnWipe()
+		self:OnWipe()
 	end
 	if msg == "check" then
-		Derp:CheckWipe()
+		self:CheckWipe()
 	end
 	if msg == "undo" then
 		EPGP:IncEPBy(UnitName("target"), "Undo Derp", 10);
@@ -126,14 +121,15 @@ function Derp:StartCombat()
 	print("DERP - START COMBAT")
 	derpTable = {}
 	derpCount = 1
-	derpState = "TRACKING"
+	self.tracking = true
 	self.wipeTimer = self:ScheduleRepeatingTimer("TimerFeedback", 5)
 end
 
 function Derp:CombatDerp(player, spell, dmg, amount)
-	if derpState ~= "TRACKING" then
+	if not self.tracking or not UnitIsPlayer(player) then
 		return
 	end
+
 	local fullMsg = player .. ": " .. spell
 
 	if derpTable[spell] ~= nil then
@@ -148,13 +144,6 @@ function Derp:CombatDerp(player, spell, dmg, amount)
 		derpTable[spell][player] = { player = player, spell = spell, amount = amount, fullMsg = fullMsg, count = 1, damage = dmg }
 	end
 
-	-- if derpTable[fullMsg] ~= nil then
-	-- 	derpTable[fullMsg].count = derpTable[fullMsg].count + 1
-	-- else
-	-- 	derpTable[fullMsg] = { player = player, spell = spell, amount = amount, fullMsg = fullMsg, count = 1 }
-	-- end
-	--derpTable[derpCount] = { player = player, spell = spell, amount = amount, fullMsg = fullMsg }
-
 	SendChatMessage(fullMsg .. " count - " .. derpCount, "GUILD")
 	derpCount = derpCount + 1
 end
@@ -162,14 +151,16 @@ end
 function Derp:OnWipe()
 	self:CancelTimer(self.wipeTimer)
 	print("DERP - ON WIPE")
-	derpState = nil
+	self.tracking = false
 	local msg
+
+	SendChatMessage("Wipe has been called! End of Derp!", "RAID_WARNING")
+
 	if derpCount > 1 then
 		for k1,v1 in pairs(derpTable) do
 			msg = ""
-			SendChatMessage("Derp for **" .. k1 .. "**)) ", "GUILD")
+			SendChatMessage("Derp for **" .. k1 .. "** ", "GUILD")
 			for k2,v2 in pairs(derpTable[k1]) do
-				--msg = msg .. derpTable[k1][k2].player .. " (" .. derpTable[k1][k2].count .. "x " .. derpTable[k1][k2].damage .. ") "
 				SendChatMessage(" - " .. derpTable[k1][k2].player .. " (" .. derpTable[k1][k2].count .. "x " .. math.ceil(derpTable[k1][k2].damage/1000) .. "k) ", "GUILD")
 			end
 			SendChatMessage(msg, "GUILD")
@@ -185,15 +176,8 @@ function Derp:TimerFeedback()
 	return
 end
 
-Derp:SetScript("OnEvent", function(self, event, timeStamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
 	local dmg, spellName = ...;
-
-	if event == "CHAT_MSG_RAID_BOSS_EMOTE" or evnt == "CHAT_MSG_MONSTER_EMOTE" or event == "CHAT_MSG_MONSTER_SAY" or event == "CHAT_MSG_MONSTER_YELL" or event == "CHAT_MSG_EMOTE" or event == "CHAT_MSG_TEXT_EMOTE" then
-		print(event)
-		print(timeStamp)
-		print(subEvent)
-		return
-	end
 
 	if event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_BN_WHISPER" and timeStamp == "repair" then
 		if timeStamp == "repair" then
@@ -204,23 +188,25 @@ Derp:SetScript("OnEvent", function(self, event, timeStamp, subEvent, hideCaster,
 		return
 	end
 
-	-- if spellName == "Sonic Pulse" then
-	-- 	print("SONIC PULSE: " .. subEvent)
-	-- end
-	
-	if subEvent ~= "SPELL_DAMAGE" and subEvent ~= "SPELL_PERIODIC_DAMAGE" then return end
-
-	if spellName == "Arcing Smash" then print("Arcing", sourceName, 'c'); end
-
-	local key = sourceName .. " - " .. spellName
-
-	for _, v in pairs(derps) do
-		if v.source == sourceName and v.spell == spellName and v.event == subEvent then
-		--if v == key then
-			Derp:CombatDerp(destName, spellName, dmg, v.amount)
-			break
-		end
+	-- Get out if not tracking
+	if not self.tracking then
+		return
 	end
-end)
+
+	if subEvent == "SPELL_DAMAGE" or subEvent == "SPELL_PERIODIC_DAMAGE" then
+		for _, v in pairs(derps) do
+			if v.source == sourceName and v.spell == spellName and v.event == subEvent then
+				Derp:CombatDerp(destName, spellName, dmg, v.amount)
+				break
+			end
+		end
+		return
+	end
+
+	if subEvent == "UNIT_DIED" then
+		Derp:CombatDerp(destName, "Death", 0, 10)
+	end
+
+end
 
 Derp:Initialize()
