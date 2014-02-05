@@ -230,7 +230,7 @@ function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, so
 	if subEvent == "SPELL_DAMAGE" or subEvent == "SPELL_PERIODIC_DAMAGE" then
 		for _, v in pairs(derps) do
 			if v.source == sourceName and v.spell == spellName and v.event == subEvent then
-				
+
 				Derp:CombatDerp(destName, spellName, dmg, v.amount)
 				break
 			end
@@ -239,13 +239,6 @@ function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, so
 	end
 
 	if subEvent == "UNIT_DIED" then
-		
-		print(sourceName)
-		print(sourceGUID)
-		print(sourceFlags)
-		print(destName)
-		print(destGUID)
-		print(destFlags)
 		Derp:CombatDerp(destName, "Death", 0, 10)
 	end
 
