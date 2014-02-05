@@ -1,23 +1,23 @@
 local derps = { 
-	{ source = "Arcing Smash", spell = "Breath of Y'Shaarj", event = "SPELL_DAMAGE", amount = 25},
-	{ source = "Rook Stonetoe", spell = "Corrupted Brew", event = "SPELL_DAMAGE", amount = 25},
-	{ source = "Thok the Bloodthirsty", spell = "Chomp", event = "SPELL_DAMAGE", amount = 25},
-	{ source = nil, spell = "Matter Purification Beam", event = "SPELL_DAMAGE", amount = 25},
+	{ source = "Arcing Smash", spell = "Breath of Y'Shaarj", event = "SPELL_DAMAGE", amount = 0},
+	{ source = "Rook Stonetoe", spell = "Corrupted Brew", event = "SPELL_DAMAGE", amount = 0},
+	{ source = "Thok the Bloodthirsty", spell = "Chomp", event = "SPELL_DAMAGE", amount = 0},
+	{ source = nil, spell = "Matter Purification Beam", event = "SPELL_DAMAGE", amount = 0},
 
 	-- Shamans
-	{ source = "Toxic Tornado", spell = "Toxic Tornado", event = "SPELL_DAMAGE", amount = 25},
-	{ source = "Toxic Tornado", spell = "Toxic Tornado", event = "SPELL_PERIODIC_DAMAGE", amount = 25},
-	{ source = "Wavebinder Kardis", spell = "Foul Geyser", event = "SPELL_DAMAGE", amount = 25},
-	{ source = "Earthbreaker Haromm", spell = "Foul Stream", event = "SPELL_PERIODIC_DAMAGE", amount = 25},
-	{ source = nil, spell = "Iron Tomb", event = "SPELL_DAMAGE", amount = 25},
+	{ source = "Toxic Tornado", spell = "Toxic Tornado", event = "SPELL_DAMAGE", amount = 0},
+	{ source = "Toxic Tornado", spell = "Toxic Tornado", event = "SPELL_PERIODIC_DAMAGE", amount = 0},
+	{ source = "Wavebinder Kardis", spell = "Foul Geyser", event = "SPELL_DAMAGE", amount = 0},
+	{ source = "Earthbreaker Haromm", spell = "Foul Stream", event = "SPELL_PERIODIC_DAMAGE", amount = 0},
+	{ source = nil, spell = "Iron Tomb", event = "SPELL_DAMAGE", amount = 0},
 
-	{ source = "Git", spell = "Devastate", event = "SPELL_DAMAGE", amount = 25},
+	{ source = "Git", spell = "Devastate", event = "SPELL_DAMAGE", amount = 0},
 
 	-- Paragons
-	{ source = "Ka'roz the Locust", spell = "Whirling", event = "SPELL_DAMAGE", amount = 25},
-	{ source = "Hisek the Swarmkeeper", spell = "Sonic Pulse", event = "SPELL_PERIODIC_DAMAGE", amount = 25},
+	{ source = "Ka'roz the Locust", spell = "Whirling", event = "SPELL_DAMAGE", amount = 0},
+	{ source = "Hisek the Swarmkeeper", spell = "Sonic Pulse", event = "SPELL_PERIODIC_DAMAGE", amount = 0},
 	--{ source = "Ka'roz the Locust", spell = "Caustic Amber", event = "SPELL_PERIODIC_DAMAGE", amount = 25},
-	{ source = nil, spell = "Matter Purification Beam", event = "SPELL_DAMAGE", amount = 25},
+	{ source = nil, spell = "Matter Purification Beam", event = "SPELL_DAMAGE", amount = 0},
 };
 
 local derpCount = 0
@@ -125,6 +125,19 @@ function Derp:StartCombat()
 	self.wipeTimer = self:ScheduleRepeatingTimer("TimerFeedback", 5)
 end
 
+function Derp:AutoDerp()
+	local data = self.autoQueue[self.autoIndex]
+
+	if data == nil or data.name == nil then
+		self:CancelTimer(self.autoTimer)
+		return
+	end
+
+	EPGP:IncEPBy(data.name, "Derp: " .. data.spell, data.amount * -1);
+
+	self.autoIndex = self.autoIndex + 1
+end
+
 function Derp:CombatDerp(player, spell, dmg, amount)
 	if not self.tracking or not UnitIsPlayer(player) then
 		return
@@ -149,6 +162,10 @@ function Derp:CombatDerp(player, spell, dmg, amount)
 end
 
 function Derp:OnWipe()
+	if not self.tracking then
+		return
+	end
+
 	self:CancelTimer(self.wipeTimer)
 	print("DERP - ON WIPE")
 	self.tracking = false
@@ -156,16 +173,30 @@ function Derp:OnWipe()
 
 	SendChatMessage("Wipe has been called! End of Derp!", "RAID_WARNING")
 
+	self.autoQueue = {}
+	self.autoIndex = 1
+	self.autoCount = 1
+
 	if derpCount > 1 then
 		for k1,v1 in pairs(derpTable) do
 			msg = ""
 			SendChatMessage("Derp for **" .. k1 .. "** ", "GUILD")
 			for k2,v2 in pairs(derpTable[k1]) do
-				SendChatMessage(" - " .. derpTable[k1][k2].player .. " (" .. derpTable[k1][k2].count .. "x " .. math.ceil(derpTable[k1][k2].damage/1000) .. "k) ", "GUILD")
+				
+				local data = derpTable[k1][k2]
+
+				SendChatMessage(" - " .. data.player .. " (" .. data.count .. "x) ", "GUILD")
+				
+				if data.amount > 0 then
+					self.autoQueue[self.autoCount] = { name = data.player, spell = data.spell, amount = data.amount }
+					self.autoCount = self.autoCount + 1
+				end
 			end
 			SendChatMessage(msg, "GUILD")
 		end
 	end
+
+	self.autoTimer = self:ScheduleRepeatingTimer("AutoDerp", 1)
 end
 
 function Derp:TimerFeedback()
@@ -179,6 +210,9 @@ end
 function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
 	local dmg, spellName = ...;
 
+	local typeFlags = bit.band(destFlags, COMBATLOG_OBJECT_TYPE_MASK)
+	local isPlayer = typeFlags == COMBATLOG_OBJECT_TYPE_PLAYER
+
 	if event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_BN_WHISPER" and timeStamp == "repair" then
 		if timeStamp == "repair" then
 			GuildBankRepairToggle:EnableRepairs()
@@ -189,13 +223,14 @@ function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, so
 	end
 
 	-- Get out if not tracking
-	if not self.tracking then
+	if not self.tracking or not isPlayer then
 		return
 	end
 
 	if subEvent == "SPELL_DAMAGE" or subEvent == "SPELL_PERIODIC_DAMAGE" then
 		for _, v in pairs(derps) do
 			if v.source == sourceName and v.spell == spellName and v.event == subEvent then
+				
 				Derp:CombatDerp(destName, spellName, dmg, v.amount)
 				break
 			end
@@ -204,6 +239,13 @@ function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, so
 	end
 
 	if subEvent == "UNIT_DIED" then
+		
+		print(sourceName)
+		print(sourceGUID)
+		print(sourceFlags)
+		print(destName)
+		print(destGUID)
+		print(destFlags)
 		Derp:CombatDerp(destName, "Death", 0, 10)
 	end
 
