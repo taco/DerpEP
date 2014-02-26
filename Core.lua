@@ -14,8 +14,8 @@ local derps = {
 	{ source = "Git", spell = "Devastate", event = "SPELL_DAMAGE", amount = 0},
 
 	-- Paragons
-	{ source = "Ka'roz the Locust", spell = "Whirling", event = "SPELL_DAMAGE", amount = 0},
-	{ source = "Hisek the Swarmkeeper", spell = "Sonic Pulse", event = "SPELL_PERIODIC_DAMAGE", amount = 0},
+	{ source = "Ka'roz the Locust", spell = "Whirling", event = "SPELL_DAMAGE", amount = 5},
+	{ source = "Hisek the Swarmkeeper", spell = "Sonic Pulse", event = "SPELL_PERIODIC_DAMAGE", amount = 5},
 	--{ source = "Ka'roz the Locust", spell = "Caustic Amber", event = "SPELL_PERIODIC_DAMAGE", amount = 25},
 	{ source = nil, spell = "Matter Purification Beam", event = "SPELL_DAMAGE", amount = 0},
 };
@@ -24,6 +24,7 @@ local derpCount = 0
 local derpTable = {}
 
 local derpAmount = -10
+local deathDerp = 0
 
 Derp = CreateFrame("Frame")
 
@@ -38,6 +39,8 @@ function Derp:Initialize()
 	self:RegisterChatCommand("derp", "Slash")
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	self:RegisterEvent("CHAT_MSG_WHISPER")
+	self:RegisterEvent("CHAT_MSG_OFFICER")
+	self:RegisterEvent("CHAT_MSG_BN_WHISPER")
 
 	self:SetScript("OnEvent", self.HandleEvent)
 end
@@ -85,6 +88,12 @@ function Derp:Slash(msg)
 	if msg == "check" then
 		self:CheckWipe()
 	end
+	if msg == "silent" then
+		self.silent = true
+	end
+	if msg == "loud" then
+		self.silent = false
+	end
 	if msg == "undo" then
 		EPGP:IncEPBy(UnitName("target"), "Undo Derp", 10);
 	end
@@ -118,6 +127,9 @@ function Derp:CheckWipe()
 end
 
 function Derp:StartCombat()
+	if self.silent then
+		return
+	end
 	print("DERP - START COMBAT")
 	derpTable = {}
 	derpCount = 1
@@ -222,6 +234,12 @@ function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, so
 		return
 	end
 
+	if event == "CHAT_MSG_OFFICER" and timeStamp == "wipe" then
+		Derp:OnWipe()
+		return
+	end
+
+
 	-- Get out if not tracking
 	if not self.tracking or not isPlayer then
 		return
@@ -239,7 +257,7 @@ function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, so
 	end
 
 	if subEvent == "UNIT_DIED" then
-		Derp:CombatDerp(destName, "Death", 0, 10)
+		Derp:CombatDerp(destName, "Death", 0, deathDerp)
 	end
 
 end
