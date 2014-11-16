@@ -218,12 +218,15 @@ function Derp:TimerFeedback()
 	end
 	return
 end
-
+-- 11/16 17:20:51.898  SPELL_INTERRUPT,Player-69-08560956,"Git-Arthas",0x511,0x0,Creature-0-69-1116-16-84894-0000693033,"Snow Fury",0x10a48,0x0,6552,"Pummel",0x1,165416,"Icy Gust",16
 function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
-	local dmg, spellName = ...;
+	local dmg, spellName, a, b, intSpellName = ...;
 
-	local typeFlags = bit.band(destFlags, COMBATLOG_OBJECT_TYPE_MASK)
-	local isPlayer = typeFlags == COMBATLOG_OBJECT_TYPE_PLAYER
+	local destTypeFlags = bit.band(destFlags, COMBATLOG_OBJECT_TYPE_MASK)
+	local isDestPlayer = destTypeFlags == COMBATLOG_OBJECT_TYPE_PLAYER
+
+	local sourceTypeFlags = bit.band(sourceFlags, COMBATLOG_OBJECT_TYPE_MASK)
+	local isSourcePlayer = sourceTypeFlags == COMBATLOG_OBJECT_TYPE_PLAYER
 
 	if event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_BN_WHISPER" and timeStamp == "repair" then
 		if timeStamp == "repair" then
@@ -239,9 +242,13 @@ function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, so
 		return
 	end
 
+	if subEvent == "SPELL_INTERRUPT" and isSourcePlayer then
+		SendChatMessage(sourceName .. " interrupted " .. intSpellName, "SAY")
+		return
+	end
 
 	-- Get out if not tracking
-	if not self.tracking or not isPlayer then
+	if not self.tracking or not isDestPlayer then
 		return
 	end
 
