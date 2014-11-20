@@ -243,7 +243,7 @@ function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, so
 	end
 
 	if subEvent == "SPELL_INTERRUPT" and isSourcePlayer then
-		SendChatMessage(sourceName .. " interrupted " .. intSpellName, "SAY")
+		SendChatMessage(sourceName .. " interrupted " .. intSpellName, "YELL")
 		return
 	end
 
