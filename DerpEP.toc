@@ -1,6 +1,10 @@
-## Interface: 50400
+## Interface: 60000
+## SavedVariables: DerpDB
 ## Title : Derp EP
 ## Notes: /derp
-## Author: My Name
+## Author: Git <Lusting on Trash>
+
+
+
 embeds.xml
 Core.lua

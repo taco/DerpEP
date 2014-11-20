@@ -20,6 +20,23 @@ local derps = {
 	{ source = nil, spell = "Matter Purification Beam", event = "SPELL_DAMAGE", amount = 0},
 };
 
+local defaults = {
+	profile = {
+		tooltip = "enabled",
+		buttonlock = false,
+		outofrange = "button",
+		colors = { range = { r = 0.8, g = 0.1, b = 0.1 }, mana = { r = 0.5, g = 0.5, b = 1.0 } },
+		selfcastmodifier = true,
+		focuscastmodifier = true,
+		selfcastrightclick = false,
+		snapping = true,
+		blizzardVehicle = false,
+		minimapIcon = {},
+		mouseovermod = "NONE"
+	}
+}
+
+
 local derpCount = 0
 local derpTable = {}
 
@@ -30,19 +47,51 @@ Derp = CreateFrame("Frame")
 
 LibStub("AceConsole-3.0"):Embed(Derp)
 LibStub("AceTimer-3.0"):Embed(Derp)
+local AceGUI = LibStub("AceGUI-3.0")
+local JSON 
 
 function Derp:Initialize()
-	print("DerpEP: Welcome to Derpville. Please enjoy your stay!")
 	
-	self.tracking = false
-	
+	self.loaded = false
 	self:RegisterChatCommand("derp", "Slash")
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	self:RegisterEvent("CHAT_MSG_WHISPER")
 	self:RegisterEvent("CHAT_MSG_OFFICER")
 	self:RegisterEvent("CHAT_MSG_BN_WHISPER")
+	self:RegisterEvent("ADDON_LOADED")
 
 	self:SetScript("OnEvent", self.HandleEvent)
+end
+
+function Derp:OnLoaded()
+	if (EPGP == nil) then
+		self:ScheduleTimer("OnLoaded", 1)
+		print("waiting for EPGP")
+		return
+	end
+	if (self.loaded) then
+		return
+	end
+
+	JSON = LibStub("LibJSON-1.0")
+
+	self.loaded = true
+
+	print("DerpEP: Welcome to Derpville. Please enjoy your stay!")
+	
+	self.tracking = false
+
+	if (not DerpDB) then
+		DerpDB = { data = {}, counter = 0 }
+	end
+
+	self.db = DerpDB
+
+	self.db.counter = self.db.counter + 1
+
+	print('Visits ' .. self.db.counter)
+
+	--DerpDB = self.db
 end
 
 function Derp:Slash(msg)
@@ -76,7 +125,7 @@ function Derp:Slash(msg)
 		EPGP:DecayEPGP()
 	end
 	if msg == "export" then
-		EPGP:ExportRoster()
+		self:Export()
 	end
 
 	if msg == "pull" then
@@ -97,6 +146,10 @@ function Derp:Slash(msg)
 	if msg == "undo" then
 		EPGP:IncEPBy(UnitName("target"), "Undo Derp", 10);
 	end
+	if msg == "push" then
+		self:Push()
+	end
+
 	local ep, gp, main = EPGP:GetEPGP(msg)
 
 	if ep then
@@ -110,6 +163,46 @@ function Derp:Slash(msg)
 	if msg == "" then
 		EPGP:IncEPBy(UnitName("target"), "Derp", -10);
 	end
+
+
+end
+
+function Derp:Push()
+	print(self.db.counter)
+	print(self.db.data)
+	if self.db.data then
+		for i=1,10 do
+			table.insert(self.db.data, {name = "Git", event = "SPELL_DAMAGE", ability = "Fire Zone", amount = 50})
+		end
+	end
+end
+
+function Derp:Export()
+
+
+	local textStore
+
+	local text = JSON.Serialize(self.db)
+
+	local frame = AceGUI:Create("Frame")
+	frame:SetTitle("Example Frame")
+	frame:SetStatusText("AceGUI-3.0 Example Container Frame")
+	frame:SetCallback("OnClose", function(widget) AceGUI:Release(widget) end)
+	frame:SetLayout("Flow")
+
+	local editbox = AceGUI:Create("MultiLineEditBox")
+	editbox:SetLabel("Insert text:")
+	editbox:SetWidth(400)
+	editbox:SetText(text)
+	editbox:SetNumLines(15)
+	editbox:SetCallback("OnEnterPressed", function(widget, event, text) textStore = text end)
+	frame:AddChild(editbox)
+
+	local button = AceGUI:Create("Button")
+	button:SetText("Click Me!")
+	button:SetWidth(200)
+	button:SetCallback("OnClick", function() print(textStore) end)
+	frame:AddChild(button)
 end
 
 function Derp:CheckWipe()
@@ -221,6 +314,11 @@ end
 -- 11/16 17:20:51.898  SPELL_INTERRUPT,Player-69-08560956,"Git-Arthas",0x511,0x0,Creature-0-69-1116-16-84894-0000693033,"Snow Fury",0x10a48,0x0,6552,"Pummel",0x1,165416,"Icy Gust",16
 function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
 	local dmg, spellName, a, b, intSpellName = ...;
+
+	if (event == "ADDON_LOADED") then
+		self:OnLoaded()
+		return
+	end
 
 	local destTypeFlags = bit.band(destFlags, COMBATLOG_OBJECT_TYPE_MASK)
 	local isDestPlayer = destTypeFlags == COMBATLOG_OBJECT_TYPE_PLAYER
