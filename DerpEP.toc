@@ -5,6 +5,10 @@
 ## Author: Git <Lusting on Trash>
 
 
+Libs\LibStub\LibStub.lua
+Libs\AceTimer-3.0\AceTimer-3.0.xml
+Libs\AceConsole-3.0\AceConsole-3.0.xml
+Libs\AceGUI-3.0\AceGUI-3.0.xml
 
 embeds.xml
 Core.lua
