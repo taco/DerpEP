@@ -12,3 +12,10 @@ Libs\AceGUI-3.0\AceGUI-3.0.xml
 
 embeds.xml
 Core.lua
+
+Combat.lua
+Commands.lua
+Definitions.lua
+EventParser.lua
+Helpers.lua
+Persistance.lua
