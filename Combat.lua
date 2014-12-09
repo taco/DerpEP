@@ -70,6 +70,23 @@ function Derp:StartSession()
 	table.insert(self.db.sessions, self.db.session)
 end
 
+function Derp:PrintSession()
+	local s = self.db.session
+	print('=== Derp Print Sessions ===')
+	print(s.time, table.getn(s.derps))
+	for _, d in pairs(s.derps) do
+		print(d.spell, d.player, d.amount)
+	end
+
+	print('=== Derp Print Sessions ===')
+	for _, z in pairs(self.db.sessions) do
+		print(z.time, table.getn(z.derps))
+		for _, d in pairs(z.derps) do
+			print(d.spell, d.player, d.amount)
+		end
+	end
+end
+
 function Derp:StopSession()
 	self.db.session = nil
 	print('Derp: Stoping Session')

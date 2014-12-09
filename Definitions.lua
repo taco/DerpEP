@@ -36,7 +36,7 @@ Derp.derpDefinitions = {
 				status = "progression",
 				abilities = {
 						{ emote = true, source = "Destructive Resonance", spell = "Destructive Resonance", event = "CHAT_MSG_MONSTER_EMOTE" },
-						{ emote = true, source = "Git-Arthas", spell = "Git-Arthas", event = "CHAT_MSG_EMOTE", buffer = 5 }
+						--{ emote = true, source = "Git-Arthas", spell = "Git-Arthas", event = "CHAT_MSG_EMOTE", buffer = 5 }
 					}
 				}
 			},
@@ -51,7 +51,9 @@ Derp.derpDefinitions = {
 					status = "progression",
 					abilities = {
 						{ source = "Dungeoneer's Training Dummy", spell = "Dummy Strike", event = "SPELL_DAMAGE" },
-						{ emote = true, source = "Git", spell = "Git", event = "CHAT_MSG_MONSTER_EMOTE" }
+						{ emote = true, source = "Git", spell = "Git", event = "CHAT_MSG_MONSTER_EMOTE" },
+						{ source = "Git", spell = "Unyielding Strikes", event = "SPELL_AURA_APPLIED_DOSE", stacks = 3},
+						{ source = "Git", spell = "Unyielding Strikes", event = "SPELL_AURA_APPLIED_DOSE", stacks = 6}
 					}
 				}
 			}

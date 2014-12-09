@@ -4,6 +4,8 @@
 function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
 	local dmg, spellName, a, b, intSpellName = ...
 
+
+
 	--print(event, subEvent)
 
 	if event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_BN_WHISPER" and timeStamp == "repair" then
@@ -95,15 +97,28 @@ function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, so
 			return
 		end
 
-		if subEvent == "SPELL_DAMAGE" or subEvent == "SPELL_PERIODIC_DAMAGE" or subEvent == "SPECIAL_EVENT" then
+		local stacks
+
+		if subEvent == "SPELL_AURA_APPLIED_DOSE" then
+			stacks = intSpellName
+		end
+
+		if subEvent == "SPELL_DAMAGE" or subEvent == "SPELL_PERIODIC_DAMAGE" or subEvent == "SPELL_AURA_APPLIED_DOSE" then
+
+			if (subEvent == "SPELL_AURA_APPLIED_DOSE") then 
+				--print('SPELL_AURA_APPLIED_DOSE', destName, intSpellName)
+				--return
+			end
 
 			for _, encounter in pairs(self.encounters) do
 
 				for _, ability in pairs(encounter.abilities) do
 
-					if not ability.emote and ability.source == sourceName and ability.spell == spellName and ability.event == subEvent then
+					if not ability.emote
+						and ((not stacks and ability.source == sourceName and ability.spell == spellName and ability.event == subEvent)
+						or	(ability.stacks == stacks and ability.spell == spellName and ability.event == subEvent)) then
 
-						print('ability detected', destName, ability, encounter, self.currentZone)
+						--print('ability detected', destName, ability, encounter, self.currentZone)
 						Derp:AddDerp(destName, ability, encounter, self.currentZone)
 						return
 

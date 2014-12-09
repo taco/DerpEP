@@ -30,6 +30,9 @@ function Derp:AddDerp(player, ability, encounter, zone)
 
 	record.player = player
 	record.spell = ability.spell
+	if ability.stacks then
+		record.spell = string.format("%s %s stacks", record.spell, ability.stacks)
+	end
 	record.source = ability.source
 	record.event = ability.event
 	record.encounter = encounter.name
@@ -54,7 +57,7 @@ function Derp:Buffer(record, ability)
 
 	local b = self:FindBuffer(key)
 
-	print("found b?", b)
+	--print("found b?", b)
 
 	if not b or time - ability.buffer > b.time then
 		b = {
@@ -114,7 +117,7 @@ end
 
 
 function Derp:Queue(record)
-	print("Adding to queue")
+	--print("Adding to queue")
 
 	if not self.dataQueue then
 		self.dataQueue = {}
@@ -133,7 +136,7 @@ function Derp:CheckQueue()
 
 	if count == 0 then
 		self.queueRunning = false
-		print('queue stopped')
+		--print('queue stopped')
 		return
 	end
 
@@ -145,7 +148,7 @@ function Derp:CheckQueue()
 	while table.getn(self.dataQueue) > 0 and n <= max do
 		local record = table.remove(self.dataQueue, 1)
 		self:Log(record)
-		print('unshifting first item', record.player)
+		--print('unshifting first item', record.player)
 		n = n + 1
 	end
 
@@ -252,7 +255,7 @@ end
 function Derp:Export()
 	local textStore
 
-	local text = self.JSON.Serialize(self.db.sessions)
+	local text = self.JSON.Serialize(self.db.session)
 
 	local frame = self.AceGUI:Create("Frame")
 	frame:SetTitle("Example Frame")

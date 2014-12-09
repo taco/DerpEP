@@ -35,6 +35,9 @@ function Derp:Slash(msg)
 	elseif cmd == "export" then
 		self:Export()
 
+	elseif cmd == "print" then
+		self:PrintSession()
+
 	elseif cmd == "session" then
 		self:StartSession()
 
