@@ -18,10 +18,14 @@ function Derp:StartCombat()
 	end
 	self.currentZoneText = GetZoneText()
 
+	_, _, _, self.currentDifficulty = GetInstanceInfo()
+
 	self.encounters = {}
 
-	for _, zone in pairs(self.derpDefinitions.zones) do
+	for __, zone in pairs(self.derpDefinitions.zones) do
+		print(zone.name, self.currentZoneText)
 		if zone.name == self.currentZoneText then
+			print('zone match', zone.name)
 			self.currentZone = zone
 			self.encounters = zone.encounters
 			break
@@ -30,14 +34,14 @@ function Derp:StartCombat()
 
 	if self.encounters == nil or table.getn(self.encounters) < 1 then
 		print('===== DERPER =====')
-		print('No encounters found for this zone: ' .. self.currentZone)
+		print('No encounters found for this zone: ' .. self.currentZoneText .. ' @ ' .. self.currentDifficulty)
 		print('===== DERPER =====')
 		return
 	end
 
 	
 	print('===== DERPER =====')
-	print('Starting combat, found ' .. table.getn(self.encounters) .. ' encounters')
+	print(string.format('Found %s encounters for %s on %s', table.getn(self.encounters), self.currentZoneText, self.currentDifficulty))
 	print('===== DERPER =====')
 
 	self.dataQueue = {}

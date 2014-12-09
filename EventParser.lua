@@ -4,6 +4,8 @@
 function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
 	local dmg, spellName, a, b, intSpellName = ...
 
+	--print(event, subEvent)
+
 	if event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_BN_WHISPER" and timeStamp == "repair" then
 		if timeStamp == "repair" then
 			GuildBankRepairToggle:EnableRepairs()
@@ -18,30 +20,67 @@ function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, so
 		return
 	end
 
-	if event == "CHAT_MSG_MONSTER_EMOTE" then
-		if subEvent == "Destructive Resonance" then
 
-			print("====DERP CHAT_MSG_MONSTER_EMOTE====")
-			print("timeStamp", timeStamp)
-			print("subEvent", subEvent)
-			
-			destName = self:Split(timeStamp, " ")[1]
-			local temp =  { source = "Destructive Resonance", spell = "Destructive Resonance", event = "SPECIAL_EVENT" }
-			event = "COMBAT_LOG_EVENT_UNFILTERED"
-			subEvent = "SPECIAL_EVENT"
-			sourceName = "Destructive Resonance"
-			spellName = "Destructive Resonance"
-			print(subEvent, sourceName, spellName, temp.source == sourceName, temp.spell == spellName, subEvent == temp.event)
-			print("====DERP CHAT_MSG_MONSTER_EMOTE====")
-		else 
+
+
+
+
+
+
+
+
+
+
+
+	if event == "CHAT_MSG_MONSTER_EMOTE" or event == "CHAT_MSG_EMOTE" then
+
+		--self.Debug('CHAT_MSG_MONSTER_EMOTE')
+		--print(event, subEvent, self.tracking, self.encounters)
+
+		--Get out if not tracking
+		if not self.tracking or not self.encounters then
 			return
 		end
+
+		sourceName = subEvent
+		spellName = subEvent
+		destName = self:Split(timeStamp, " ")[1]
+
+		--print(sourceName, spellName, destName)
+
+		for _, encounter in pairs(self.encounters) do
+
+			for _, ability in pairs(encounter.abilities) do
+
+				if ability.emote and ability.source == sourceName and ability.spell == spellName then
+
+					--print('ability detected', destName, ability, encounter, self.currentZone)
+					Derp:AddDerp(destName, ability, encounter, self.currentZone)
+					return
+
+				end
+			end
+
+		end
+
+		return
 	end
+
+
+
+
+
+
+
+
+
+
+
 
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 
 		local destTypeFlags = bit.band(destFlags, COMBATLOG_OBJECT_TYPE_MASK)
-		--local isDestPlayer = destTypeFlags == COMBATLOG_OBJECT_TYPE_PLAYER
+		local isDestPlayer = destTypeFlags == COMBATLOG_OBJECT_TYPE_PLAYER
 
 		local sourceTypeFlags = bit.band(sourceFlags, COMBATLOG_OBJECT_TYPE_MASK)
 		local isSourcePlayer = sourceTypeFlags == COMBATLOG_OBJECT_TYPE_PLAYER
@@ -52,35 +91,25 @@ function Derp:HandleEvent(event, timeStamp, subEvent, hideCaster, sourceGUID, so
 		end
 
 		--Get out if not tracking
-		if not self.tracking then
+		if not self.tracking or not self.encounters then
 			return
 		end
 
 		if subEvent == "SPELL_DAMAGE" or subEvent == "SPELL_PERIODIC_DAMAGE" or subEvent == "SPECIAL_EVENT" then
-			if (sourceName == "Dungeoneer's Training Dummy") then
-				print(sourceName, spellName, subEvent)
-			end
-
-			if (not self.encounters) then return end
 
 			for _, encounter in pairs(self.encounters) do
 
 				for _, ability in pairs(encounter.abilities) do
 
-					if ability.source == sourceName and ability.spell == spellName and ability.event == subEvent then
+					if not ability.emote and ability.source == sourceName and ability.spell == spellName and ability.event == subEvent then
 
 						print('ability detected', destName, ability, encounter, self.currentZone)
 						Derp:AddDerp(destName, ability, encounter, self.currentZone)
-						--Derp:CombatDerp(destName, ability, encounter, self.currentZone)
 						return
 
 					end
 				end
-				-- if v.source == sourceName and v.spell == spellName and v.event == subEvent then
 
-				-- 	Derp:CombatDerp(destName, spellName, dmg, v.amount)
-				-- 	break
-				-- end
 			end
 			return
 		end

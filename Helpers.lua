@@ -24,7 +24,12 @@ end
 
 
 function Derp:ZoneInfo()
-	local name, type, difficultyIndex, difficultyName, maxPlayers, dynamicDifficulty, isDynamic, mapID = GetInstanceInfo()
 
-	print(name, type, difficultyIndex, difficultyName, maxPlayers, dynamicDifficulty, isDynamic, mapID)
+	print(GetInstanceInfo())
+end
+
+function Derp:Debug(...)
+	print('==== DERP DEBUG ====')
+	print(arg)
+	print('====================')
 end

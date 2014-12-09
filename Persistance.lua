@@ -18,8 +18,8 @@ function Derp:AddDerp(player, ability, encounter, zone)
 
 	--if not inGuild then return end
 
-	record.amount = ability.amount or encounter.amount or derps.amount
-	record.status = ability.status or encounter.status or zone.status
+	record.amount = ability.amount or encounter.amount or self.derpDefinitions.amount
+	record.status = ability.status or ability[self.currentDifficulty] or encounter.status or zone.status
 
 
 	if record.status == "progression" or not isDerpable then
@@ -165,7 +165,7 @@ function Derp:Log(record)
 	table.insert(self.db.session.derps, record)
 	
 	if record.amount == 0 then
-		SendChatMessage("EPGP: 0 EP (" .. msg .. ") to " .. record.player, "PARTY")
+		SendChatMessage("EPGP: 0 EP (" .. msg .. ") to " .. record.player, "GUILD")
 	else
 		EPGP:IncEPBy(record.player, msg, record.amount)
 	end

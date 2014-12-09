@@ -35,7 +35,8 @@ Derp.derpDefinitions = {
 				name = "Imperator Mar'gok",
 				status = "progression",
 				abilities = {
-						{ source = "Destructive Resonance", spell = "Destructive Resonance", event = "SPECIAL_EVENT" }
+						{ emote = true, source = "Destructive Resonance", spell = "Destructive Resonance", event = "CHAT_MSG_MONSTER_EMOTE" },
+						{ emote = true, source = "Git-Arthas", spell = "Git-Arthas", event = "CHAT_MSG_EMOTE", buffer = 5 }
 					}
 				}
 			},
@@ -49,7 +50,8 @@ Derp.derpDefinitions = {
 					name = "Training Dummy",
 					status = "progression",
 					abilities = {
-						{ source = "Dungeoneer's Training Dummy", spell = "Dummy Strike", event = "SPELL_DAMAGE" }
+						{ source = "Dungeoneer's Training Dummy", spell = "Dummy Strike", event = "SPELL_DAMAGE" },
+						{ emote = true, source = "Git", spell = "Git", event = "CHAT_MSG_MONSTER_EMOTE" }
 					}
 				}
 			}
