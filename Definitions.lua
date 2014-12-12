@@ -40,7 +40,11 @@ Derp.derpDefinitions = {
 			
 			}, {
 				name = "Brackenspore",
+				Mythic = "farm",
 				abilities = {
+					{ source = "Brackenspore", spell = "Exploding Fungus", event = "SPELL_DAMAGE" },
+					{ source = nil, spell = "Call of the Tides", event = "SPELL_DAMAGE" },
+
 				}
 			
 			}, {
@@ -60,10 +64,10 @@ Derp.derpDefinitions = {
 				name = "Imperator Mar'gok",
 				Heroic = "farm",
 				abilities = {
-						{ emote = true, source = "Destructive Resonance", spell = "Destructive Resonance", event = "CHAT_MSG_MONSTER_EMOTE" },
+						{ emote = true, source = "Destructive Resonance", spell = "Destructive Resonance", event = "CHAT_MSG_MONSTER_EMOTE", amount = 10 },
 					}
 				}
-			},
+			}
 		}, {
 			name = "Blackrock Foundry",
 			encounters = {}
