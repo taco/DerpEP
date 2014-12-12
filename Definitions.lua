@@ -16,27 +16,51 @@ Derp.derpDefinitions = {
 			}
 		}, {
 			name = "Highmaul",
+			status = "progression",
+			Normal = "farm",
+			Heroic = "progression",
+			Mythic = "farm",
+			status = "progression",
 			encounters = {
-				{
-					name = "Kargath Bladefist",
-					status = "progression",
-					abilities = {
-						{ source = "Ka'roz the Locust", spell = "Whirling", event = "SPELL_DAMAGE" },
-						{ source = "Hisek the Swarmkeeper", spell = "Sonic Pulse", event = "SPELL_PERIODIC_DAMAGE"}
-					}
-				}, {
-					name = "The Butcher",
-					status = "progression",
-					abilities = {
-						{ source = "Ka'roz the Locust", spell = "Whirling", event = "SPELL_DAMAGE" },
-						{ source = "Hisek the Swarmkeeper", spell = "Sonic Pulse", event = "SPELL_PERIODIC_DAMAGE"}
-					}
-				}, {
+			{
+				name = "Kargath Bladefise",
+				abilities = {
+					{ source = "Fire Pillar", spell = "Flame Gout", event = "SPELL_DAMAGE", amount = 1}
+				}
+			
+			}, {
+				name = "The Butcher",
+				abilities = {
+				}
+			
+			}, {
+				name = "Tectus",
+				abilities = {
+				}
+			
+			}, {
+				name = "Brackenspore",
+				abilities = {
+				}
+			
+			}, {
+				name = "Twin Ogron",
+				abilities = {
+					{ source = "Phemos", spell = "Blaze", event = "SPELL_AURA_APPLIED_DOSE", stacks = 3, amount = 0},
+					{ source = "Phemos", spell = "Blaze", event = "SPELL_AURA_APPLIED_DOSE", stacks = 5, amount = 5},
+					{ source = "Phemos", spell = "Blaze", event = "SPELL_AURA_APPLIED_DOSE", stacks = 10, amount = 10},
+					{ source = "Pol", spell = "Shield Charge", event = "SPELL_DAMAGE", amount = 2}
+				}
+			}, {
+				name = "Ko'ragh",
+				abilities = {
+
+				}
+			}, {
 				name = "Imperator Mar'gok",
-				status = "progression",
+				Heroic = "farm",
 				abilities = {
 						{ emote = true, source = "Destructive Resonance", spell = "Destructive Resonance", event = "CHAT_MSG_MONSTER_EMOTE" },
-						--{ emote = true, source = "Git-Arthas", spell = "Git-Arthas", event = "CHAT_MSG_EMOTE", buffer = 5 }
 					}
 				}
 			},

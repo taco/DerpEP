@@ -19,7 +19,7 @@ function Derp:AddDerp(player, ability, encounter, zone)
 	--if not inGuild then return end
 
 	record.amount = ability.amount or encounter.amount or self.derpDefinitions.amount
-	record.status = ability.status or ability[self.currentDifficulty] or encounter.status or zone.status
+	record.status = ability[self.currentDifficulty] or ability.status or encounter[self.currentDifficulty] or encounter.status or zone[self.currentDifficulty] or zone.status
 
 
 	if record.status == "progression" or not isDerpable then
@@ -37,6 +37,7 @@ function Derp:AddDerp(player, ability, encounter, zone)
 	record.event = ability.event
 	record.encounter = encounter.name
 	record.zone = zone.name
+	record.difficulty = self.currentDifficulty
 	record.time = time()
 
 
@@ -159,6 +160,7 @@ end
 
 function Derp:Log(record) 
 	local msg = string.format("Derp: %s", record.spell)
+	local pull = self.db.pull
 
 	if not self.db.session or not self.db.session.derps then
 		print("Cannot log, no session running")
@@ -166,7 +168,15 @@ function Derp:Log(record)
 	end
 
 	table.insert(self.db.session.derps, record)
+
+	local pullSpell = self:FindOrInit(pull, {key = record.spell, count = 0, players = {}})
+
+	pullSpell.count = pullSpell.count + 1
+
+	local pullPlayer = self:FindOrInit(pullSpell.players, {key = record.player, count = 0})
 	
+	pullPlayer.count = pullPlayer.count + 1
+
 	if record.amount == 0 then
 		SendChatMessage("EPGP: 0 EP (" .. msg .. ") to " .. record.player, "GUILD")
 	else
@@ -243,7 +253,7 @@ function Derp:UndoLog()
 		record.amount = record.amount * -1
 
 		if record.amount == 0 then
-			SendChatMessage("EPGP: 0 EP (" .. msg .. ") to " .. record.player, "PARTY")
+			SendChatMessage("EPGP: 0 EP (" .. msg .. ") to " .. record.player, "GUILD")
 		else
 			EPGP:IncEPBy(record.player, msg, record.amount)
 		end

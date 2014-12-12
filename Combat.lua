@@ -39,6 +39,8 @@ function Derp:StartCombat()
 		return
 	end
 
+	self.db.pull = {}
+
 	
 	print('===== DERPER =====')
 	print(string.format('Found %s encounters for %s on %s', table.getn(self.encounters), self.currentZoneText, self.currentDifficulty))
@@ -122,4 +124,36 @@ function Derp:OnWipe()
 	local msg
 
 	SendChatMessage("Wipe has been called! End of Derp!", "RAID_WARNING")
+
+	
+	if table.getn(self.db.pull) == 0 then return end
+	
+	SendChatMessage("=== Derp Report ===", "RAID")
+	for _, pullSpell in pairs(self.db.pull) do
+		
+		SendChatMessage(string.format("%s (%s): ", pullSpell.key, pullSpell.count), "RAID")
+		
+		local counter = 0
+		local output = ""
+		
+		for _, player in pairs(pullSpell.players) do
+			counter = counter + 1
+			output = output .. string.format("%s (%s), ", player.key, player.count)
+
+			if counter == 8 then
+				SendChatMessage("       " .. string.sub(output, 1, -3), "RAID")
+				counter = 0
+				output = ""
+			end
+			
+		end
+
+		if counter > 0 then
+			SendChatMessage("       " .. string.sub(output, 1, -3), "RAID")
+		end
+	end
+
 end
+
+
+--/script c={asd = 1, xcv = 2, zpo = 3};table.sort(c); for a, b in pairs(c) do print(a, b) end
